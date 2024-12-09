@@ -1,0 +1,33 @@
+services:
+  db:
+    restart: always
+    image: postgres:15.3
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=legendary-octo-guide
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+  api:
+    restart: always
+    command: /start
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: compose/api/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .env:/.env
+    image: legendary-octo-guide-api:latest
+
+volumes:
+  db_data:
